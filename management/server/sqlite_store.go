@@ -61,7 +61,7 @@ func NewSqliteStore(dataDir string, metrics telemetry.AppMetrics) (*SqliteStore,
 	sql.SetMaxOpenConns(conns) // TODO: make it configurable
 
 	err = db.AutoMigrate(
-		&SetupKey{}, &nbpeer.Peer{}, &User{}, &PersonalAccessToken{}, &Group{}, &Rule{},
+		&SetupKey{}, &nbpeer.Peer{}, &User{}, &PersonalAccessToken{}, &Group{},
 		&Account{}, &Policy{}, &PolicyRule{}, &route.Route{}, &nbdns.NameServerGroup{},
 		&installation{}, &account.ExtraSettings{},
 	)

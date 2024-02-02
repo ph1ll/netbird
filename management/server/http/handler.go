@@ -74,7 +74,6 @@ func APIHandler(accountManager s.AccountManager, jwtValidator jwtclaims.JWTValid
 	api.addUsersEndpoint()
 	api.addUsersTokensEndpoint()
 	api.addSetupKeysEndpoint()
-	api.addRulesEndpoint()
 	api.addPoliciesEndpoint()
 	api.addGroupsEndpoint()
 	api.addRoutesEndpoint()
@@ -143,15 +142,6 @@ func (apiHandler *apiHandler) addSetupKeysEndpoint() {
 	apiHandler.Router.HandleFunc("/setup-keys", keysHandler.CreateSetupKey).Methods("POST", "OPTIONS")
 	apiHandler.Router.HandleFunc("/setup-keys/{keyId}", keysHandler.GetSetupKey).Methods("GET", "OPTIONS")
 	apiHandler.Router.HandleFunc("/setup-keys/{keyId}", keysHandler.UpdateSetupKey).Methods("PUT", "OPTIONS")
-}
-
-func (apiHandler *apiHandler) addRulesEndpoint() {
-	rulesHandler := NewRulesHandler(apiHandler.AccountManager, apiHandler.AuthCfg)
-	apiHandler.Router.HandleFunc("/rules", rulesHandler.GetAllRules).Methods("GET", "OPTIONS")
-	apiHandler.Router.HandleFunc("/rules", rulesHandler.CreateRule).Methods("POST", "OPTIONS")
-	apiHandler.Router.HandleFunc("/rules/{ruleId}", rulesHandler.UpdateRule).Methods("PUT", "OPTIONS")
-	apiHandler.Router.HandleFunc("/rules/{ruleId}", rulesHandler.GetRule).Methods("GET", "OPTIONS")
-	apiHandler.Router.HandleFunc("/rules/{ruleId}", rulesHandler.DeleteRule).Methods("DELETE", "OPTIONS")
 }
 
 func (apiHandler *apiHandler) addPoliciesEndpoint() {
