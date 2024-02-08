@@ -169,8 +169,10 @@ var (
 				log.Infof("geo location service has been initialized from %s", config.Datadir)
 			}
 
+			pv := integrations.NewValidator()
+
 			accountManager, err := server.BuildManager(store, peersUpdateManager, idpManager, mgmtSingleAccModeDomain,
-				dnsDomain, eventStore, geo, userDeleteFromIDPEnabled)
+				dnsDomain, eventStore, geo, userDeleteFromIDPEnabled, pv)
 			if err != nil {
 				return fmt.Errorf("failed to build default manager: %v", err)
 			}

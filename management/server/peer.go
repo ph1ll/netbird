@@ -8,8 +8,6 @@ import (
 
 	"github.com/rs/xid"
 
-	"github.com/netbirdio/management-integrations/additions"
-
 	"github.com/netbirdio/netbird/management/server/activity"
 	nbpeer "github.com/netbirdio/netbird/management/server/peer"
 	"github.com/netbirdio/netbird/management/server/status"
@@ -162,7 +160,7 @@ func (am *DefaultAccountManager) UpdatePeer(accountID, userID string, update *nb
 		return nil, status.Errorf(status.NotFound, "peer %s not found", update.ID)
 	}
 
-	update, err = additions.ValidatePeersUpdateRequest(update, peer, userID, accountID, am.eventStore, am.GetDNSDomain())
+	update, err = am.peerValidator.ValidatePeersUpdateRequest(update, peer, userID, accountID, am.eventStore, am.GetDNSDomain())
 	if err != nil {
 		return nil, err
 	}
@@ -428,7 +426,7 @@ func (am *DefaultAccountManager) AddPeer(setupKey, userID string, peer *nbpeer.P
 	}
 
 	if account.Settings.Extra != nil {
-		newPeer = additions.PreparePeer(newPeer, account.Settings.Extra)
+		newPeer = am.peerValidator.PreparePeer(newPeer, account.Settings.Extra)
 	}
 
 	// add peer to 'All' group
