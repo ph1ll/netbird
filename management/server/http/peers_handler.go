@@ -3,7 +3,6 @@ package http
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/netbirdio/management-integrations/integrations"
 	"net"
 	"net/http"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/netbirdio/netbird/management/server"
 	"github.com/netbirdio/netbird/management/server/http/api"
 	"github.com/netbirdio/netbird/management/server/http/util"
+	"github.com/netbirdio/netbird/management/server/integrated_validator"
 	"github.com/netbirdio/netbird/management/server/jwtclaims"
 	nbpeer "github.com/netbirdio/netbird/management/server/peer"
 	"github.com/netbirdio/netbird/management/server/status"
@@ -21,11 +21,11 @@ import (
 type PeersHandler struct {
 	accountManager  server.AccountManager
 	claimsExtractor *jwtclaims.ClaimsExtractor
-	peerValidator   integrations.IntegratedValidator
+	peerValidator   integrated_validator.IntegratedValidator
 }
 
 // NewPeersHandler creates a new PeersHandler HTTP handler
-func NewPeersHandler(accountManager server.AccountManager, authCfg AuthCfg, peerValidator integrations.IntegratedValidator) *PeersHandler {
+func NewPeersHandler(accountManager server.AccountManager, authCfg AuthCfg, peerValidator integrated_validator.IntegratedValidator) *PeersHandler {
 	return &PeersHandler{
 		accountManager: accountManager,
 		claimsExtractor: jwtclaims.NewClaimsExtractor(

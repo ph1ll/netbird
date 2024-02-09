@@ -7,9 +7,9 @@ import (
 	"github.com/rs/cors"
 
 	"github.com/netbirdio/management-integrations/integrations"
-
 	s "github.com/netbirdio/netbird/management/server"
 	"github.com/netbirdio/netbird/management/server/http/middleware"
+	"github.com/netbirdio/netbird/management/server/integrated_validator"
 	"github.com/netbirdio/netbird/management/server/jwtclaims"
 	"github.com/netbirdio/netbird/management/server/telemetry"
 )
@@ -26,7 +26,7 @@ type apiHandler struct {
 	Router                  *mux.Router
 	AccountManager          s.AccountManager
 	AuthCfg                 AuthCfg
-	integratedPeerValidator integrations.IntegratedValidator
+	integratedPeerValidator integrated_validator.IntegratedValidator
 }
 
 // EmptyObject is an empty struct used to return empty JSON object
@@ -34,7 +34,7 @@ type emptyObject struct {
 }
 
 // APIHandler creates the Management service HTTP API handler registering all the available endpoints.
-func APIHandler(accountManager s.AccountManager, jwtValidator jwtclaims.JWTValidator, appMetrics telemetry.AppMetrics, authCfg AuthCfg, integratedPeerValidator integrations.IntegratedValidator) (http.Handler, error) {
+func APIHandler(accountManager s.AccountManager, jwtValidator jwtclaims.JWTValidator, appMetrics telemetry.AppMetrics, authCfg AuthCfg, integratedPeerValidator integrated_validator.IntegratedValidator) (http.Handler, error) {
 	claimsExtractor := jwtclaims.NewClaimsExtractor(
 		jwtclaims.WithAudience(authCfg.Audience),
 		jwtclaims.WithUserIDClaim(authCfg.UserIDClaim),

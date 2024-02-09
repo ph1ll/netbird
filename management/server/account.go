@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	b64 "encoding/base64"
 	"fmt"
+	"github.com/netbirdio/netbird/management/server/integrated_validator"
 	"hash/crc32"
 	"math/rand"
 	"net"
@@ -22,7 +23,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/netbirdio/management-integrations/additions"
-	"github.com/netbirdio/management-integrations/integrations"
 	"github.com/netbirdio/netbird/base62"
 	nbdns "github.com/netbirdio/netbird/dns"
 	"github.com/netbirdio/netbird/management/server/account"
@@ -154,7 +154,7 @@ type DefaultAccountManager struct {
 	// userDeleteFromIDPEnabled allows to delete user from IDP when user is deleted from account
 	userDeleteFromIDPEnabled bool
 
-	integratedPeerValidator integrations.IntegratedValidator
+	integratedPeerValidator integrated_validator.IntegratedValidator
 }
 
 // Settings represents Account settings structure that can be modified via API and Dashboard
@@ -372,7 +372,7 @@ func (a *Account) GetGroup(groupID string) *Group {
 }
 
 // GetPeerNetworkMap returns a group by ID if exists, nil otherwise
-func (a *Account) GetPeerNetworkMap(peerID, dnsDomain string, integratedValidator integrations.IntegratedValidator) *NetworkMap {
+func (a *Account) GetPeerNetworkMap(peerID, dnsDomain string, integratedValidator integrated_validator.IntegratedValidator) *NetworkMap {
 	peer := a.Peers[peerID]
 	if peer == nil {
 		return &NetworkMap{
@@ -849,7 +849,7 @@ func (a *Account) UserGroupsRemoveFromPeers(userID string, groups ...string) {
 func BuildManager(store Store, peersUpdateManager *PeersUpdateManager, idpManager idp.Manager,
 	singleAccountModeDomain string, dnsDomain string, eventStore activity.Store, geo *geolocation.Geolocation,
 	userDeleteFromIDPEnabled bool,
-	integratedPeerValidator integrations.IntegratedValidator,
+	integratedPeerValidator integrated_validator.IntegratedValidator,
 ) (*DefaultAccountManager, error) {
 	am := &DefaultAccountManager{
 		Store:                    store,
