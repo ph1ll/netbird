@@ -297,6 +297,7 @@ func (am *DefaultAccountManager) GetNetworkMap(peerID string) (*NetworkMap, erro
 	if peer == nil {
 		return nil, status.Errorf(status.NotFound, "peer with ID %s not found", peerID)
 	}
+
 	return account.GetPeerNetworkMap(peer.ID, am.dnsDomain), nil
 }
 
