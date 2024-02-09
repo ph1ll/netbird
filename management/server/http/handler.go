@@ -23,9 +23,10 @@ type AuthCfg struct {
 }
 
 type apiHandler struct {
-	Router         *mux.Router
-	AccountManager s.AccountManager
-	AuthCfg        AuthCfg
+	Router                  *mux.Router
+	AccountManager          s.AccountManager
+	AuthCfg                 AuthCfg
+	integratedPeerValidator integrations.IntegratedValidator
 }
 
 // EmptyObject is an empty struct used to return empty JSON object
@@ -33,7 +34,7 @@ type emptyObject struct {
 }
 
 // APIHandler creates the Management service HTTP API handler registering all the available endpoints.
-func APIHandler(accountManager s.AccountManager, jwtValidator jwtclaims.JWTValidator, appMetrics telemetry.AppMetrics, authCfg AuthCfg) (http.Handler, error) {
+func APIHandler(accountManager s.AccountManager, jwtValidator jwtclaims.JWTValidator, appMetrics telemetry.AppMetrics, authCfg AuthCfg, integratedPeerValidator integrations.IntegratedValidator) (http.Handler, error) {
 	claimsExtractor := jwtclaims.NewClaimsExtractor(
 		jwtclaims.WithAudience(authCfg.Audience),
 		jwtclaims.WithUserIDClaim(authCfg.UserIDClaim),
@@ -63,9 +64,10 @@ func APIHandler(accountManager s.AccountManager, jwtValidator jwtclaims.JWTValid
 	router.Use(metricsMiddleware.Handler, corsMiddleware.Handler, authMiddleware.Handler, acMiddleware.Handler)
 
 	api := apiHandler{
-		Router:         router,
-		AccountManager: accountManager,
-		AuthCfg:        authCfg,
+		Router:                  router,
+		AccountManager:          accountManager,
+		AuthCfg:                 authCfg,
+		integratedPeerValidator: integratedPeerValidator,
 	}
 
 	integrations.RegisterHandlers(api.Router, accountManager, claimsExtractor)
@@ -115,7 +117,7 @@ func (apiHandler *apiHandler) addAccountsEndpoint() {
 }
 
 func (apiHandler *apiHandler) addPeersEndpoint() {
-	peersHandler := NewPeersHandler(apiHandler.AccountManager, apiHandler.AuthCfg)
+	peersHandler := NewPeersHandler(apiHandler.AccountManager, apiHandler.AuthCfg, apiHandler.integratedPeerValidator)
 	apiHandler.Router.HandleFunc("/peers", peersHandler.GetAllPeers).Methods("GET", "OPTIONS")
 	apiHandler.Router.HandleFunc("/peers/{peerId}", peersHandler.HandlePeer).
 		Methods("GET", "PUT", "DELETE", "OPTIONS")

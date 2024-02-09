@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/netbirdio/management-integrations/integrations"
 	"hash/crc32"
 	"math/rand"
 	"net"
@@ -22,6 +21,8 @@ import (
 	"github.com/rs/xid"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/netbirdio/management-integrations/additions"
+	"github.com/netbirdio/management-integrations/integrations"
 	"github.com/netbirdio/netbird/base62"
 	nbdns "github.com/netbirdio/netbird/dns"
 	"github.com/netbirdio/netbird/management/server/account"
@@ -153,7 +154,7 @@ type DefaultAccountManager struct {
 	// userDeleteFromIDPEnabled allows to delete user from IDP when user is deleted from account
 	userDeleteFromIDPEnabled bool
 
-	peerValidator integrations.Validator
+	integratedPeerValidator integrations.IntegratedValidator
 }
 
 // Settings represents Account settings structure that can be modified via API and Dashboard
@@ -199,7 +200,6 @@ func (s *Settings) Copy() *Settings {
 }
 
 // Account represents a unique account of the system
-// todo: account depend from the integration.Validator interface. How can I add this dependency?
 type Account struct {
 	// we have to name column to aid as it collides with Network.Id when work with associations
 	Id string `gorm:"primaryKey"`
@@ -372,13 +372,27 @@ func (a *Account) GetGroup(groupID string) *Group {
 }
 
 // GetPeerNetworkMap returns a group by ID if exists, nil otherwise
-func (a *Account) GetPeerNetworkMap(peerID, dnsDomain string) *NetworkMap {
+func (a *Account) GetPeerNetworkMap(peerID, dnsDomain string, integratedValidator integrations.IntegratedValidator) *NetworkMap {
 	peer := a.Peers[peerID]
 	if peer == nil {
 		return &NetworkMap{
 			Network: a.Network.Copy(),
 		}
 	}
+
+	groups := a.getPeerGroupsList(peerID)
+	valid, err := integratedValidator.ValidatePeer(peer, groups)
+	if err != nil {
+		log.Errorf("failed to validate peer %s: %s", peerID, err)
+	}
+
+	if !valid {
+		return &NetworkMap{
+			Network: a.Network.Copy(),
+		}
+	}
+
+	// todo validate peers with integrated validator too
 	validatedPeers := additions.ValidatePeers([]*nbpeer.Peer{peer})
 	if len(validatedPeers) == 0 {
 		return &NetworkMap{
@@ -595,6 +609,19 @@ func (a *Account) getPeerGroups(peerID string) lookupMap {
 		}
 	}
 	return groupList
+}
+
+func (a *Account) getPeerGroupsList(peerID string) []string {
+	var grps []string
+	for groupID, group := range a.Groups {
+		for _, id := range group.Peers {
+			if id == peerID {
+				grps = append(grps, groupID)
+				break
+			}
+		}
+	}
+	return grps
 }
 
 func (a *Account) getSetupKeyGroups(setupKey string) ([]string, error) {
@@ -822,7 +849,7 @@ func (a *Account) UserGroupsRemoveFromPeers(userID string, groups ...string) {
 func BuildManager(store Store, peersUpdateManager *PeersUpdateManager, idpManager idp.Manager,
 	singleAccountModeDomain string, dnsDomain string, eventStore activity.Store, geo *geolocation.Geolocation,
 	userDeleteFromIDPEnabled bool,
-	peerValidator integrations.Validator,
+	integratedPeerValidator integrations.IntegratedValidator,
 ) (*DefaultAccountManager, error) {
 	am := &DefaultAccountManager{
 		Store:                    store,
@@ -836,7 +863,7 @@ func BuildManager(store Store, peersUpdateManager *PeersUpdateManager, idpManage
 		eventStore:               eventStore,
 		peerLoginExpiry:          NewDefaultScheduler(),
 		userDeleteFromIDPEnabled: userDeleteFromIDPEnabled,
-		peerValidator:            peerValidator,
+		integratedPeerValidator:  integratedPeerValidator,
 	}
 	allAccounts := store.GetAllAccounts()
 	// enable single account mode only if configured by user and number of existing accounts is not grater than 1
@@ -922,7 +949,7 @@ func (am *DefaultAccountManager) UpdateAccountSettings(accountID, userID string,
 		return nil, err
 	}
 
-	err = am.peerValidator.ValidateExtraSettings(newSettings.Extra, account.Settings.Extra, account.Peers, userID, accountID, am.eventStore)
+	err = additions.ValidateExtraSettings(newSettings.Extra, account.Settings.Extra, account.Peers, userID, accountID, am.eventStore)
 	if err != nil {
 		return nil, err
 	}

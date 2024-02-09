@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/netbirdio/management-integrations/integrations"
 	"net"
 	"net/http"
 
@@ -20,16 +21,18 @@ import (
 type PeersHandler struct {
 	accountManager  server.AccountManager
 	claimsExtractor *jwtclaims.ClaimsExtractor
+	peerValidator   integrations.IntegratedValidator
 }
 
 // NewPeersHandler creates a new PeersHandler HTTP handler
-func NewPeersHandler(accountManager server.AccountManager, authCfg AuthCfg) *PeersHandler {
+func NewPeersHandler(accountManager server.AccountManager, authCfg AuthCfg, peerValidator integrations.IntegratedValidator) *PeersHandler {
 	return &PeersHandler{
 		accountManager: accountManager,
 		claimsExtractor: jwtclaims.NewClaimsExtractor(
 			jwtclaims.WithAudience(authCfg.Audience),
 			jwtclaims.WithUserIDClaim(authCfg.UserIDClaim),
 		),
+		peerValidator: peerValidator,
 	}
 }
 
@@ -62,7 +65,7 @@ func (h *PeersHandler) getPeer(account *server.Account, peerID, userID string, w
 
 	groupsInfo := toGroupsInfo(account.Groups, peer.ID)
 
-	netMap := account.GetPeerNetworkMap(peerID, h.accountManager.GetDNSDomain())
+	netMap := account.GetPeerNetworkMap(peerID, h.accountManager.GetDNSDomain(), h.peerValidator)
 	accessiblePeers := toAccessiblePeers(netMap, dnsDomain)
 
 	util.WriteJSONObject(w, toSinglePeerResponse(peerToReturn, groupsInfo, dnsDomain, accessiblePeers))
@@ -92,7 +95,7 @@ func (h *PeersHandler) updatePeer(account *server.Account, user *server.User, pe
 
 	groupMinimumInfo := toGroupsInfo(account.Groups, peer.ID)
 
-	netMap := account.GetPeerNetworkMap(peerID, h.accountManager.GetDNSDomain())
+	netMap := account.GetPeerNetworkMap(peerID, h.accountManager.GetDNSDomain(), h.peerValidator)
 	accessiblePeers := toAccessiblePeers(netMap, dnsDomain)
 
 	util.WriteJSONObject(w, toSinglePeerResponse(peer, groupMinimumInfo, dnsDomain, accessiblePeers))
@@ -177,7 +180,7 @@ func (h *PeersHandler) GetAllPeers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PeersHandler) accessiblePeersNumber(account *server.Account, peerID string) int {
-	netMap := account.GetPeerNetworkMap(peerID, h.accountManager.GetDNSDomain())
+	netMap := account.GetPeerNetworkMap(peerID, h.accountManager.GetDNSDomain(), h.peerValidator)
 	return len(netMap.Peers) + len(netMap.OfflinePeers)
 }
 

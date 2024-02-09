@@ -169,10 +169,10 @@ var (
 				log.Infof("geo location service has been initialized from %s", config.Datadir)
 			}
 
-			pv := integrations.NewValidator()
+			integratedPeerValidator := integrations.NewIntegratedValidator()
 
 			accountManager, err := server.BuildManager(store, peersUpdateManager, idpManager, mgmtSingleAccModeDomain,
-				dnsDomain, eventStore, geo, userDeleteFromIDPEnabled, pv)
+				dnsDomain, eventStore, geo, userDeleteFromIDPEnabled, integratedPeerValidator)
 			if err != nil {
 				return fmt.Errorf("failed to build default manager: %v", err)
 			}
@@ -232,7 +232,7 @@ var (
 				UserIDClaim:  config.HttpConfig.AuthUserIDClaim,
 				KeysLocation: config.HttpConfig.AuthKeysLocation,
 			}
-			httpAPIHandler, err := httpapi.APIHandler(accountManager, *jwtValidator, appMetrics, httpAPIAuthCfg)
+			httpAPIHandler, err := httpapi.APIHandler(accountManager, *jwtValidator, appMetrics, httpAPIAuthCfg, integratedPeerValidator)
 			if err != nil {
 				return fmt.Errorf("failed creating HTTP API handler: %v", err)
 			}
