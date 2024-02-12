@@ -16,14 +16,25 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 
-	"github.com/netbirdio/management-integrations/integrations"
 	nbdns "github.com/netbirdio/netbird/dns"
+	"github.com/netbirdio/netbird/management/server/account"
 	"github.com/netbirdio/netbird/management/server/activity"
 	"github.com/netbirdio/netbird/management/server/jwtclaims"
 	nbpeer "github.com/netbirdio/netbird/management/server/peer"
 	"github.com/netbirdio/netbird/management/server/posture"
 	"github.com/netbirdio/netbird/route"
 )
+
+type MocIntegratedValidator struct {
+}
+
+func (MocIntegratedValidator) PreparePeer(*nbpeer.Peer, *account.ExtraSettings, []string) *nbpeer.Peer {
+	return nil
+}
+
+func (MocIntegratedValidator) ValidatePeer(peer *nbpeer.Peer, groups []string) (bool, error) {
+	return true, nil
+}
 
 func verifyCanAddPeerToAccount(t *testing.T, manager AccountManager, account *Account, userID string) {
 	t.Helper()
@@ -372,7 +383,7 @@ func TestAccount_GetPeerNetworkMap(t *testing.T) {
 			account.Groups[all.ID].Peers = append(account.Groups[all.ID].Peers, peer.ID)
 		}
 
-		networkMap := account.GetPeerNetworkMap(testCase.peerID, "netbird.io", integrations.NewIntegratedValidator())
+		networkMap := account.GetPeerNetworkMap(testCase.peerID, "netbird.io", MocIntegratedValidator{})
 		assert.Len(t, networkMap.Peers, len(testCase.expectedPeers))
 		assert.Len(t, networkMap.OfflinePeers, len(testCase.expectedOfflinePeers))
 	}
@@ -2235,7 +2246,7 @@ func createManager(t *testing.T) (*DefaultAccountManager, error) {
 		return nil, err
 	}
 	eventStore := &activity.InMemoryEventStore{}
-	return BuildManager(store, NewPeersUpdateManager(nil), nil, "", "netbird.cloud", eventStore, nil, false, integrations.NewIntegratedValidator())
+	return BuildManager(store, NewPeersUpdateManager(nil), nil, "", "netbird.cloud", eventStore, nil, false, MocIntegratedValidator{})
 }
 
 func createStore(t *testing.T) (Store, error) {
