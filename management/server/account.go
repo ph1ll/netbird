@@ -125,6 +125,7 @@ type AccountManager interface {
 	SavePostureChecks(accountID, userID string, postureChecks *posture.Checks) error
 	DeletePostureChecks(accountID, postureChecksID, userID string) error
 	ListPostureChecks(accountID, userID string) ([]*posture.Checks, error)
+	UpdateIntegrationApprovalGroups(accountID string, userID string, groups []string) error
 }
 
 type DefaultAccountManager struct {
@@ -380,19 +381,19 @@ func (a *Account) GetPeerNetworkMap(peerID, dnsDomain string, integratedValidato
 		}
 	}
 
-	groups := a.getPeerGroupsList(peerID)
-	valid, err := integratedValidator.ValidatePeer(peer, groups)
-	if err != nil {
-		log.Errorf("failed to validate peer %s: %s", peerID, err)
-	}
+	if isPeerAssignedToIntegratedApproval(a, peerID) {
+		valid, err := integratedValidator.ValidatePeer(peer)
+		if err != nil {
+			log.Errorf("failed to validate peer %s: %s", peerID, err)
+		}
 
-	if !valid {
-		return &NetworkMap{
-			Network: a.Network.Copy(),
+		if !valid {
+			return &NetworkMap{
+				Network: a.Network.Copy(),
+			}
 		}
 	}
 
-	// todo validate peers with integrated validator too
 	validatedPeers := additions.ValidatePeers([]*nbpeer.Peer{peer})
 	if len(validatedPeers) == 0 {
 		return &NetworkMap{

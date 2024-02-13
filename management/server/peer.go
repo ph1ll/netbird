@@ -453,9 +453,8 @@ func (am *DefaultAccountManager) AddPeer(setupKey, userID string, peer *nbpeer.P
 		}
 	}
 
-	grps := account.getPeerGroupsList(newPeer.ID)
-	if account.Settings.Extra != nil {
-		newPeer = am.integratedPeerValidator.PreparePeer(newPeer, account.Settings.Extra, grps)
+	if isPeerAssignedToIntegratedApproval(account, newPeer.ID) {
+		newPeer = am.integratedPeerValidator.PreparePeer(newPeer, account.Settings.Extra)
 	}
 
 	if addedByUser {

@@ -6,6 +6,6 @@ import (
 )
 
 type IntegratedValidator interface {
-	PreparePeer(peer *nbpeer.Peer, extraSettings *account.ExtraSettings, groups []string) *nbpeer.Peer
-	ValidatePeer(peer *nbpeer.Peer, groups []string) (bool, error)
+	PreparePeer(peer *nbpeer.Peer, extraSettings *account.ExtraSettings) *nbpeer.Peer
+	ValidatePeer(peer *nbpeer.Peer) (bool, error)
 }
