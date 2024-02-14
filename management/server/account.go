@@ -394,6 +394,7 @@ func (a *Account) GetPeerNetworkMap(peerID, dnsDomain string, integratedValidato
 		}
 	}
 
+	// todo: can we remove this part?
 	validatedPeers := additions.ValidatePeers([]*nbpeer.Peer{peer})
 	if len(validatedPeers) == 0 {
 		return &NetworkMap{
