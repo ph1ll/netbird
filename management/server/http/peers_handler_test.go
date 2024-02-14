@@ -103,7 +103,7 @@ func initTestMetaData(peers ...*nbpeer.Peer) *PeersHandler {
 				}
 			}),
 		),
-		peerValidator: integrations.NewIntegratedValidator(),
+		peerValidator: integrations.NewIntegratedApproval(),
 	}
 }
 

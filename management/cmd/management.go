@@ -169,7 +169,7 @@ var (
 				log.Infof("geo location service has been initialized from %s", config.Datadir)
 			}
 
-			integratedPeerValidator := integrations.NewIntegratedValidator()
+			integratedPeerValidator := integrations.NewIntegratedApproval()
 
 			accountManager, err := server.BuildManager(store, peersUpdateManager, idpManager, mgmtSingleAccModeDomain,
 				dnsDomain, eventStore, geo, userDeleteFromIDPEnabled, integratedPeerValidator)

@@ -28,7 +28,7 @@ import (
 	"github.com/netbirdio/netbird/management/server/activity"
 	"github.com/netbirdio/netbird/management/server/geolocation"
 	"github.com/netbirdio/netbird/management/server/idp"
-	"github.com/netbirdio/netbird/management/server/integrated_validator"
+	"github.com/netbirdio/netbird/management/server/integrated_approval"
 	"github.com/netbirdio/netbird/management/server/jwtclaims"
 	nbpeer "github.com/netbirdio/netbird/management/server/peer"
 	"github.com/netbirdio/netbird/management/server/posture"
@@ -125,7 +125,7 @@ type AccountManager interface {
 	SavePostureChecks(accountID, userID string, postureChecks *posture.Checks) error
 	DeletePostureChecks(accountID, postureChecksID, userID string) error
 	ListPostureChecks(accountID, userID string) ([]*posture.Checks, error)
-	UpdateIntegrationApprovalGroups(accountID string, userID string, groups []string) error
+	UpdateIntegratedApprovalGroups(accountID string, userID string, groups []string) error
 }
 
 type DefaultAccountManager struct {
@@ -155,7 +155,7 @@ type DefaultAccountManager struct {
 	// userDeleteFromIDPEnabled allows to delete user from IDP when user is deleted from account
 	userDeleteFromIDPEnabled bool
 
-	integratedPeerValidator integrated_validator.IntegratedValidator
+	integratedPeerValidator integrated_approval.IntegratedApproval
 }
 
 // Settings represents Account settings structure that can be modified via API and Dashboard
@@ -373,7 +373,7 @@ func (a *Account) GetGroup(groupID string) *Group {
 }
 
 // GetPeerNetworkMap returns a group by ID if exists, nil otherwise
-func (a *Account) GetPeerNetworkMap(peerID, dnsDomain string, integratedValidator integrated_validator.IntegratedValidator) *NetworkMap {
+func (a *Account) GetPeerNetworkMap(peerID, dnsDomain string, integratedValidator integrated_approval.IntegratedApproval) *NetworkMap {
 	peer := a.Peers[peerID]
 	if peer == nil {
 		return &NetworkMap{
@@ -850,7 +850,7 @@ func (a *Account) UserGroupsRemoveFromPeers(userID string, groups ...string) {
 func BuildManager(store Store, peersUpdateManager *PeersUpdateManager, idpManager idp.Manager,
 	singleAccountModeDomain string, dnsDomain string, eventStore activity.Store, geo *geolocation.Geolocation,
 	userDeleteFromIDPEnabled bool,
-	integratedPeerValidator integrated_validator.IntegratedValidator,
+	integratedPeerValidator integrated_approval.IntegratedApproval,
 ) (*DefaultAccountManager, error) {
 	am := &DefaultAccountManager{
 		Store:                    store,
