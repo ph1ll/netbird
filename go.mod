@@ -58,7 +58,7 @@ require (
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/nadoo/ipset v0.5.0
 	github.com/netbirdio/management-integrations/additions v0.0.0-20240118163419-8a7c87accb22
-	github.com/netbirdio/management-integrations/integrations v0.0.0-20240214100357-bfde506f9f9f
+	github.com/netbirdio/management-integrations/integrations v0.0.0-20240214102022-db42f9b14cc0
 	github.com/okta/okta-sdk-golang/v2 v2.18.0
 	github.com/oschwald/maxminddb-golang v1.12.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -173,5 +173,3 @@ replace github.com/getlantern/systray => github.com/netbirdio/systray v0.0.0-202
 replace golang.zx2c4.com/wireguard => github.com/netbirdio/wireguard-go v0.0.0-20240105182236-6c340dd55aed
 
 replace github.com/cloudflare/circl => github.com/cunicu/circl v0.0.0-20230801113412-fec58fc7b5f6
-
-replace github.com/netbirdio/management-integrations/integrations => github.com/netbirdio/management-integrations/integrations v0.0.0-20240209141902-0ea98052953a
