@@ -702,3 +702,8 @@ func (am *MockAccountManager) ListPostureChecks(accountID, userID string) ([]*po
 	}
 	return nil, status.Errorf(codes.Unimplemented, "method ListPostureChecks is not implemented")
 }
+
+// UpdateIntegratedApprovalGroups mocks UpdateIntegratedApprovalGroups of the AccountManager interface
+func (am *MockAccountManager) UpdateIntegratedApprovalGroups(accountID string, userID string, groups []string) error {
+	return status.Errorf(codes.Unimplemented, "method UpdateIntegratedApprovalGroups is not implemented")
+}

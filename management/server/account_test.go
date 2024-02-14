@@ -28,11 +28,11 @@ import (
 type MocIntegratedValidator struct {
 }
 
-func (MocIntegratedValidator) PreparePeer(*nbpeer.Peer, *account.ExtraSettings, []string) *nbpeer.Peer {
+func (MocIntegratedValidator) PreparePeer(*nbpeer.Peer, *account.ExtraSettings) *nbpeer.Peer {
 	return nil
 }
 
-func (MocIntegratedValidator) ValidatePeer(peer *nbpeer.Peer, groups []string) (bool, error) {
+func (MocIntegratedValidator) ValidatePeer(peer *nbpeer.Peer) (bool, error) {
 	return true, nil
 }
 
