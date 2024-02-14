@@ -4,6 +4,7 @@ type ExtraSettings struct {
 	// PeerApprovalEnabled enables or disables the need for peers bo be approved by an administrator
 	PeerApprovalEnabled bool
 
+	// IntegratedApprovalGroups list of group IDs to be used with integrated approval configurations
 	IntegratedApprovalGroups []string `gorm:"serializer:json"`
 }
 
