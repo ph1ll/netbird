@@ -381,26 +381,21 @@ func (a *Account) GetPeerNetworkMap(peerID, dnsDomain string, integratedValidato
 		}
 	}
 
-	if isPeerAssignedToIntegratedApproval(a, peerID) {
-		valid, err := integratedValidator.ValidatePeer(peer)
-		if err != nil {
-			log.Errorf("failed to validate peer %s: %s", peerID, err)
-		}
-
-		if !valid {
-			return &NetworkMap{
-				Network: a.Network.Copy(),
-			}
-		}
+	var integratedGroups []string
+	if a.Settings.Extra != nil {
+		integratedGroups = a.Settings.Extra.IntegratedApprovalGroups
+	}
+	valid, err := integratedValidator.ValidatePeer(a.Id, peer, a.GetPeerGroupsList(peer.ID), integratedGroups)
+	if err != nil {
+		log.Errorf("failed to validate peer %s: %s", peerID, err)
 	}
 
-	// todo: can we remove this part?
-	validatedPeers := additions.ValidatePeers([]*nbpeer.Peer{peer})
-	if len(validatedPeers) == 0 {
+	if !valid {
 		return &NetworkMap{
 			Network: a.Network.Copy(),
 		}
 	}
+
 	aclPeers, firewallRules := a.getPeerConnectionResources(peerID)
 	// exclude expired peers
 	var peersToConnect []*nbpeer.Peer
@@ -579,6 +574,20 @@ func (a *Account) FindSetupKey(setupKey string) (*SetupKey, error) {
 	return key, nil
 }
 
+// GetPeerGroupsList return with the list of groups ID.
+func (a *Account) GetPeerGroupsList(peerID string) []string {
+	var grps []string
+	for groupID, group := range a.Groups {
+		for _, id := range group.Peers {
+			if id == peerID {
+				grps = append(grps, groupID)
+				break
+			}
+		}
+	}
+	return grps
+}
+
 func (a *Account) getUserGroups(userID string) ([]string, error) {
 	user, err := a.FindUser(userID)
 	if err != nil {
@@ -611,19 +620,6 @@ func (a *Account) getPeerGroups(peerID string) lookupMap {
 		}
 	}
 	return groupList
-}
-
-func (a *Account) getPeerGroupsList(peerID string) []string {
-	var grps []string
-	for groupID, group := range a.Groups {
-		for _, id := range group.Peers {
-			if id == peerID {
-				grps = append(grps, groupID)
-				break
-			}
-		}
-	}
-	return grps
 }
 
 func (a *Account) getSetupKeyGroups(setupKey string) ([]string, error) {

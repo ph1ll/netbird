@@ -32,18 +32,3 @@ func (am *DefaultAccountManager) UpdateIntegratedApprovalGroups(accountID string
 	extra.IntegratedApprovalGroups = groups
 	return am.Store.SaveAccount(a)
 }
-
-func isPeerAssignedToIntegratedApproval(a *Account, id string) bool {
-	if a.Settings.Extra == nil {
-		return false
-	}
-
-	for _, peerGroup := range a.getPeerGroupsList(id) {
-		for _, ig := range a.Settings.Extra.IntegratedApprovalGroups {
-			if ig == peerGroup {
-				return true
-			}
-		}
-	}
-	return false
-}

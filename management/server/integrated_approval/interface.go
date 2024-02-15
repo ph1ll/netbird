@@ -7,6 +7,6 @@ import (
 
 // IntegratedApproval interface exists to avoid the circle dependencies
 type IntegratedApproval interface {
-	PreparePeer(peer *nbpeer.Peer, extraSettings *account.ExtraSettings) *nbpeer.Peer
-	ValidatePeer(peer *nbpeer.Peer) (bool, error)
+	PreparePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, extraSettings *account.ExtraSettings) *nbpeer.Peer
+	ValidatePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, integratedApprovalGroups []string) (bool, error)
 }
