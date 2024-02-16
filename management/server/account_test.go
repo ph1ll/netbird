@@ -29,7 +29,7 @@ type MocIntegratedValidator struct {
 }
 
 func (MocIntegratedValidator) PreparePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, extraSettings *account.ExtraSettings) *nbpeer.Peer {
-	return nil
+	return peer
 }
 
 func (MocIntegratedValidator) ValidatePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, integratedApprovalGroups []string) (bool, error) {
