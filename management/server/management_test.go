@@ -2,6 +2,8 @@ package server_test
 
 import (
 	"context"
+	"github.com/netbirdio/netbird/management/server/account"
+	nbpeer "github.com/netbirdio/netbird/management/server/peer"
 	"math/rand"
 	"net"
 	"os"
@@ -22,9 +24,7 @@ import (
 	"github.com/netbirdio/netbird/encryption"
 	mgmtProto "github.com/netbirdio/netbird/management/proto"
 	"github.com/netbirdio/netbird/management/server"
-	"github.com/netbirdio/netbird/management/server/account"
 	"github.com/netbirdio/netbird/management/server/activity"
-	nbpeer "github.com/netbirdio/netbird/management/server/peer"
 	"github.com/netbirdio/netbird/util"
 )
 
@@ -445,14 +445,14 @@ var _ = Describe("Management service", func() {
 	})
 })
 
-type MocIntegratedValidator struct {
+type MocIntegratedApproval struct {
 }
 
-func (MocIntegratedValidator) PreparePeer(string, *nbpeer.Peer, []string, *account.ExtraSettings) *nbpeer.Peer {
-	return nil
+func (MocIntegratedApproval) PreparePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, extraSettings *account.ExtraSettings) *nbpeer.Peer {
+	return peer
 }
 
-func (MocIntegratedValidator) ValidatePeer(string, *nbpeer.Peer, []string, []string) (bool, error) {
+func (MocIntegratedApproval) ValidatePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, integratedApprovalGroups []string) (bool, error) {
 	return true, nil
 }
 
@@ -512,7 +512,7 @@ func startServer(config *server.Config) (*grpc.Server, net.Listener) {
 	peersUpdateManager := server.NewPeersUpdateManager(nil)
 	eventStore := &activity.InMemoryEventStore{}
 	accountManager, err := server.BuildManager(store, peersUpdateManager, nil, "", "",
-		eventStore, nil, false, MocIntegratedValidator{})
+		eventStore, nil, false, MocIntegratedApproval{})
 	if err != nil {
 		log.Fatalf("failed creating a manager: %v", err)
 	}

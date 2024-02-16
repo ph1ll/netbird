@@ -25,14 +25,14 @@ import (
 	"github.com/netbirdio/netbird/route"
 )
 
-type MocIntegratedValidator struct {
+type MocIntegratedApproval struct {
 }
 
-func (MocIntegratedValidator) PreparePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, extraSettings *account.ExtraSettings) *nbpeer.Peer {
+func (MocIntegratedApproval) PreparePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, extraSettings *account.ExtraSettings) *nbpeer.Peer {
 	return peer
 }
 
-func (MocIntegratedValidator) ValidatePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, integratedApprovalGroups []string) (bool, error) {
+func (MocIntegratedApproval) ValidatePeer(accountID string, peer *nbpeer.Peer, peersGroup []string, integratedApprovalGroups []string) (bool, error) {
 	return true, nil
 }
 
@@ -383,7 +383,7 @@ func TestAccount_GetPeerNetworkMap(t *testing.T) {
 			account.Groups[all.ID].Peers = append(account.Groups[all.ID].Peers, peer.ID)
 		}
 
-		networkMap := account.GetPeerNetworkMap(testCase.peerID, "netbird.io", MocIntegratedValidator{})
+		networkMap := account.GetPeerNetworkMap(testCase.peerID, "netbird.io", MocIntegratedApproval{})
 		assert.Len(t, networkMap.Peers, len(testCase.expectedPeers))
 		assert.Len(t, networkMap.OfflinePeers, len(testCase.expectedOfflinePeers))
 	}
@@ -2246,7 +2246,7 @@ func createManager(t *testing.T) (*DefaultAccountManager, error) {
 		return nil, err
 	}
 	eventStore := &activity.InMemoryEventStore{}
-	return BuildManager(store, NewPeersUpdateManager(nil), nil, "", "netbird.cloud", eventStore, nil, false, MocIntegratedValidator{})
+	return BuildManager(store, NewPeersUpdateManager(nil), nil, "", "netbird.cloud", eventStore, nil, false, MocIntegratedApproval{})
 }
 
 func createStore(t *testing.T) (Store, error) {
