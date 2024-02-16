@@ -448,11 +448,11 @@ var _ = Describe("Management service", func() {
 type MocIntegratedValidator struct {
 }
 
-func (MocIntegratedValidator) PreparePeer(*nbpeer.Peer, *account.ExtraSettings) *nbpeer.Peer {
+func (MocIntegratedValidator) PreparePeer(string, *nbpeer.Peer, []string, *account.ExtraSettings) *nbpeer.Peer {
 	return nil
 }
 
-func (MocIntegratedValidator) ValidatePeer(peer *nbpeer.Peer) (bool, error) {
+func (MocIntegratedValidator) ValidatePeer(string, *nbpeer.Peer, []string, []string) (bool, error) {
 	return true, nil
 }
 
